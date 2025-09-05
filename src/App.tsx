@@ -15,6 +15,7 @@ import Progress from './pages/Progress';
 import VoiceLearning from './pages/VoiceLearning';
 import FlashcardSetup from './pages/FlashcardSetup';
 import FlashcardStudy from './pages/FlashcardStudy';
+import FlashcardSubjectSelection from './pages/FlashcardSubjectSelection';
 
 function App() {
   return (
@@ -74,6 +75,11 @@ function App() {
           <Route path="/flashcards/custom" element={
             <ProtectedRoute>
               <FlashcardSetup />
+            </ProtectedRoute>
+          } />
+          <Route path="/flashcards/create" element={
+            <ProtectedRoute>
+              <FlashcardSubjectSelection />
             </ProtectedRoute>
           } />
           <Route path="/study/:setId" element={
