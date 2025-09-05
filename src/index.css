@@ -94,11 +94,15 @@ a:focus {
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
   background: #f1f5f9;
+}
+
+::-webkit-scrollbar-track:window-inactive {
+  background: #e2e8f0;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -108,6 +112,43 @@ a:focus {
 
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #2563eb, #7c3aed);
+}
+
+/* Dark theme scrollbar */
+.dark ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Ensure scrollable containers */
+.scrollable {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.scrollable::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollable::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.scrollable::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.scrollable::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* Loading animation */
@@ -152,4 +193,34 @@ input, textarea, select {
   .no-print {
     display: none !important;
   }
+}
+
+/* Fix for interview page scrolling */
+.interview-container {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.interview-content {
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #475569 #1e293b;
+}
+
+.interview-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.interview-content::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.interview-content::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 3px;
+}
+
+.interview-content::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
 }

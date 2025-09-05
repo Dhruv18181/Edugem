@@ -4,19 +4,25 @@ import {
   MicOff, 
   Phone, 
   PhoneOff, 
-  Volume2, 
-  VolumeX, 
-  User, 
-  Bot, 
-  Play, 
-  Square,
-  Sparkles,
+  Video, 
+  VideoOff, 
+  Monitor, 
+  Users, 
+  MoreVertical, 
+  Maximize2, 
+  Minimize2,
   Clock,
-  MessageSquare,
-  Settings,
-  Zap,
+  AlertCircle,
+  Bot,
+  User,
   CheckCircle,
-  AlertCircle
+  ArrowLeft,
+  Star,
+  Globe,
+  Award,
+  MessageSquare,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import Vapi from '@vapi-ai/web';
 
@@ -25,78 +31,83 @@ interface ConversationMessage {
   type: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  isTranscribing?: boolean;
+  isPartial?: boolean;
+}
+
+interface InterviewerAgent {
+  id: string;
+  name: string;
+  title: string;
+  description: string;
+  accent: string;
+  expertise: string[];
+  avatar: string;
+  color: string;
+  rating: number;
+  interviews: number;
 }
 
 const Interview: React.FC = () => {
+  const [selectedAgent, setSelectedAgent] = useState<InterviewerAgent | null>(null);
+  const [showAgentSelection, setShowAgentSelection] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [isListening, setIsListening] = useState(false);
+  const [isVideoOn, setIsVideoOn] = useState(true);
   const [conversation, setConversation] = useState<ConversationMessage[]>([]);
+  const [liveTranscript, setLiveTranscript] = useState<{user: string, assistant: string}>({user: '', assistant: ''});
   const [connectionStatus, setConnectionStatus] = useState<string>('Disconnected');
   const [error, setError] = useState<string | null>(null);
-  const [currentTranscript, setCurrentTranscript] = useState<string>('');
-  const [isUserSpeaking, setIsUserSpeaking] = useState(false);
   const [sessionDuration, setSessionDuration] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState<{user: boolean, assistant: boolean}>({user: false, assistant: false});
+  const [showTranscript, setShowTranscript] = useState(true);
   
   const vapiRef = useRef<Vapi | null>(null);
   const conversationEndRef = useRef<HTMLDivElement>(null);
   const sessionStartRef = useRef<Date | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Assistant configuration with your prompt
-  const assistantConfig = {
-    model: {
-      provider: "openai",
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content: `[Identity]  
-You are an AI voice-based interviewer dedicated to helping candidates prepare for job roles in their chosen domains. Your aim is to simulate a job interview experience that is both informative and supportive.
-
-[Style]  
-- Use a friendly, conversational, and professional tone.  
-- Speak clearly and coherently, maintaining engagement and comfort.
-
-[Response Guidelines]  
-- Ask one question at a time and wait for the user's response.  
-- Provide polite acknowledgments like "Thanks for the explanation" or "Interesting point".  
-- Maintain a smooth and professional interaction.
-
-[Task & Goals]  
-1. Introduce yourself and set the context:  
-   - Start with: "Hi, I'm your AI interviewer here to help you prepare for your dream job. Let's begin!"
-2. Ask about the candidate's technical skills:  
-   - "Let's start by understanding your skill set. What technologies and tools are you most comfortable with?"  
-3. Inquire about their domain interests:  
-   - "Which domain or industry would you like to work in?"  
-4. Ask about their company aspirations:  
-   - "Do you have any companies in mind that you're targeting or dream of working with?"  
-5. Tailor your follow-up questions based on their domain interest:  
-   - For Web Development: Explore topics like React, APIs, deployment.  
-   - For Data Science: Discuss pandas, machine learning, model evaluation.  
-6. Evaluate their understanding without direct feedback, using polite acknowledgments.  
-7. End the interview with a friendly closing:  
-   - "Thank you for sharing your thoughts. I wish you all the best in your journey!"
-
-[Error Handling / Fallback]  
-- If no response is detected after 10 seconds, gently prompt the user again to ensure engagement.  
-- If the user's input is unclear, ask for clarification politely and proceed based on their response.  
-- Continuously adapt questions according to the user's prior responses to maintain relevance and interest.`
-        }
-      ]
+  const interviewers: InterviewerAgent[] = [
+    {
+      id: 'f1ac752f-cc05-421d-8fab-567a675f1fa6',
+      name: 'Elliot',
+      title: 'Senior Technical Interviewer',
+      description: 'Experienced Canadian interviewer specializing in technical roles and software engineering positions.',
+      accent: 'Canadian English',
+      expertise: ['Technical Interviews', 'Software Engineering', 'System Design', 'Problem Solving'],
+      avatar: '🇨🇦',
+      color: 'from-blue-500 to-cyan-500',
+      rating: 4.9,
+      interviews: 1250
     },
-    voice: {
-      provider: "openai",
-      voiceId: "alloy"
+    {
+      id: '91c87146-0136-47c9-bad7-ac5c3a88a0b1',
+      name: 'Neha',
+      title: 'HR & Behavioral Specialist',
+      description: 'Professional Indian interviewer with expertise in behavioral interviews and cultural fit assessment.',
+      accent: 'Indian English',
+      expertise: ['Behavioral Interviews', 'HR Screening', 'Cultural Fit', 'Leadership Assessment'],
+      avatar: '🇮🇳',
+      color: 'from-purple-500 to-pink-500',
+      rating: 4.8,
+      interviews: 980
     },
-    firstMessage: "Hi, I'm your AI interviewer here to help you prepare for your dream job. Let's begin!"
-  };
+    {
+      id: 'b423edf2-2d98-471b-8805-24711e6a7543',
+      name: 'Rohan',
+      title: 'Product & Strategy Expert',
+      description: 'Indian-American interviewer focused on product management, strategy, and business development roles.',
+      accent: 'Indian-American English',
+      expertise: ['Product Management', 'Strategy', 'Business Development', 'Market Analysis'],
+      avatar: '🌎',
+      color: 'from-green-500 to-teal-500',
+      rating: 4.9,
+      interviews: 1100
+    }
+  ];
 
   useEffect(() => {
-    // Initialize Vapi SDK
     if (import.meta.env.VITE_VAPI_PUBLIC_KEY) {
       vapiRef.current = new Vapi(import.meta.env.VITE_VAPI_PUBLIC_KEY);
       setupVapiEventListeners();
@@ -116,7 +127,7 @@ You are an AI voice-based interviewer dedicated to helping candidates prepare fo
 
   useEffect(() => {
     scrollToBottom();
-  }, [conversation, currentTranscript]);
+  }, [conversation]);
 
   const scrollToBottom = () => {
     conversationEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -155,50 +166,48 @@ You are an AI voice-based interviewer dedicated to helping candidates prepare fo
       setConnectionStatus('Connected');
       setError(null);
       startTimer();
-      addMessage('assistant', 'Interview session started. Please wait for the interviewer to begin...');
+      setShowAgentSelection(false);
+      addMessage('assistant', `Hello! I'm ${selectedAgent?.name}. I'm ready to conduct your interview. Let's begin!`);
     });
 
     vapiRef.current.on('call-end', () => {
       setIsConnected(false);
-      setIsListening(false);
-      setIsUserSpeaking(false);
       setConnectionStatus('Disconnected');
-      setCurrentTranscript('');
       stopTimer();
-      addMessage('assistant', 'Interview session ended. Thank you for participating!');
+      setIsSpeaking({user: false, assistant: false});
+      setLiveTranscript({user: '', assistant: ''});
+      addMessage('assistant', 'Interview session ended. Thank you for your time!');
     });
 
     vapiRef.current.on('speech-start', () => {
-      setIsListening(true);
-      setIsUserSpeaking(true);
+      setIsSpeaking(prev => ({...prev, assistant: true}));
     });
 
     vapiRef.current.on('speech-end', () => {
-      setIsListening(false);
-      setIsUserSpeaking(false);
-      setCurrentTranscript('');
+      setIsSpeaking(prev => ({...prev, assistant: false}));
     });
 
     vapiRef.current.on('message', (message: any) => {
-      if (message.type === 'transcript' && message.transcript) {
-        const content = message.transcript.content || message.transcript.text || '';
-        
-        if (message.transcript.role === 'user') {
-          if (message.transcript.transcriptType === 'partial') {
-            setCurrentTranscript(content);
-          } else {
-            setCurrentTranscript('');
-            if (content.trim()) {
+      if (message.type === 'transcript') {
+        const content = message.transcript || '';
+        const role = message.role;
+        const transcriptType = message.transcriptType;
+
+        if (content.trim()) {
+          if (role === 'user') {
+            if (transcriptType === 'partial') {
+              setLiveTranscript(prev => ({...prev, user: content}));
+              setIsSpeaking(prev => ({...prev, user: true}));
+            } else {
+              setLiveTranscript(prev => ({...prev, user: ''}));
               addMessage('user', content);
+              setIsSpeaking(prev => ({...prev, user: false}));
             }
-          }
-        } else if (message.transcript.role === 'assistant') {
-          if (message.transcript.transcriptType === 'partial') {
-            // Update current assistant message or create new one
-            setCurrentTranscript(content);
-          } else {
-            setCurrentTranscript('');
-            if (content.trim()) {
+          } else if (role === 'assistant' || role === 'system') {
+            if (transcriptType === 'partial') {
+              setLiveTranscript(prev => ({...prev, assistant: content}));
+            } else {
+              setLiveTranscript(prev => ({...prev, assistant: ''}));
               addMessage('assistant', content);
             }
           }
@@ -212,6 +221,7 @@ You are an AI voice-based interviewer dedicated to helping candidates prepare fo
       setIsConnected(false);
       setConnectionStatus('Error');
       stopTimer();
+      setIsSpeaking({user: false, assistant: false});
     });
   };
 
@@ -226,8 +236,8 @@ You are an AI voice-based interviewer dedicated to helping candidates prepare fo
   };
 
   const startInterview = async () => {
-    if (!vapiRef.current) {
-      setError('Vapi SDK not loaded. Please refresh the page.');
+    if (!vapiRef.current || !selectedAgent) {
+      setError('Please select an interviewer first.');
       return;
     }
 
@@ -236,9 +246,10 @@ You are an AI voice-based interviewer dedicated to helping candidates prepare fo
     setConnectionStatus('Connecting...');
     setConversation([]);
     setSessionDuration(0);
+    setLiveTranscript({user: '', assistant: ''});
 
     try {
-      await vapiRef.current.start(assistantConfig);
+      await vapiRef.current.start(selectedAgent.id);
     } catch (error) {
       console.error('Failed to start interview:', error);
       setError('Failed to start interview. Please check your connection and try again.');
@@ -269,295 +280,466 @@ You are an AI voice-based interviewer dedicated to helping candidates prepare fo
     setIsMuted(newMutedState);
   };
 
-  return (
-    <div className="h-full overflow-y-auto bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <Mic className="h-8 w-8 text-white" />
-            </div>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">AI Voice Interview</h1>
-          <p className="text-gray-600 text-lg">Practice with our advanced AI interviewer and boost your confidence</p>
-        </div>
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
 
-        {/* Status Bar */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-3">
-                <div className={`w-4 h-4 rounded-full ${
-                  isConnected ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
-                }`} />
-                <span className="text-gray-900 font-medium">
-                  {connectionStatus}
-                </span>
-              </div>
-              
-              {isConnected && (
-                <div className="flex items-center space-x-3 text-gray-600">
-                  <Clock className="h-5 w-5" />
-                  <span className="font-mono text-lg">{formatDuration(sessionDuration)}</span>
-                </div>
-              )}
-              
-              {isListening && (
-                <div className="flex items-center space-x-3 text-blue-600">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-6 bg-blue-500 rounded-full animate-pulse"></div>
-                    <div className="w-2 h-8 bg-blue-500 rounded-full animate-pulse animation-delay-100"></div>
-                    <div className="w-2 h-4 bg-blue-500 rounded-full animate-pulse animation-delay-200"></div>
-                    <div className="w-2 h-7 bg-blue-500 rounded-full animate-pulse animation-delay-300"></div>
+  const selectAgent = (agent: InterviewerAgent) => {
+    setSelectedAgent(agent);
+  };
+
+  const backToSelection = () => {
+    if (isConnected) {
+      endInterview();
+    }
+    setShowAgentSelection(true);
+    setSelectedAgent(null);
+    setConversation([]);
+    setError(null);
+  };
+
+  // Agent Selection Screen
+  if (showAgentSelection) {
+  return (
+    <div className="h-full overflow-y-auto bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          
+          {/* Header */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-6 shadow-2xl">
+              <Bot className="h-10 w-10 text-white" />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Choose Your AI Interviewer
+            </h1>
+            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+              Select from our expert AI interviewers, each specialized in different areas and speaking styles
+            </p>
+          </div>
+
+          {/* Interviewer Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {interviewers.map((interviewer) => (
+              <div
+                key={interviewer.id}
+                className={`relative bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl transition-all duration-300 hover:scale-105 hover:bg-white/15 cursor-pointer group ${
+                  selectedAgent?.id === interviewer.id ? 'ring-4 ring-blue-400 bg-white/20' : ''
+                }`}
+                onClick={() => selectAgent(interviewer)}
+              >
+                {/* Selection Indicator */}
+                {selectedAgent?.id === interviewer.id && (
+                  <div className="absolute -top-3 -right-3 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                    <CheckCircle className="h-5 w-5 text-white" />
                   </div>
-                  <span className="font-medium">Listening...</span>
-                </div>
-              )}
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              {isConnected && (
-                <button
-                  onClick={toggleMute}
-                  className={`p-3 rounded-xl transition-all duration-200 ${
-                    isMuted 
-                      ? 'bg-red-100 text-red-600 hover:bg-red-200' 
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                  title={isMuted ? 'Unmute' : 'Mute'}
+                )}
+
+                {/* Avatar */}
+                <div
+                  className={`w-20 h-20 bg-gradient-to-br ${interviewer.color} rounded-2xl flex items-center justify-center text-3xl mb-6 mx-auto shadow-xl group-hover:scale-110 transition-transform duration-300`}
                 >
-                  {isMuted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                  {interviewer.avatar}
+                </div>
+
+                {/* Info */}
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-white mb-2">{interviewer.name}</h3>
+                  <p className="text-blue-200 font-medium mb-3">{interviewer.title}</p>
+                  <p className="text-blue-100 text-sm leading-relaxed mb-4">
+                    {interviewer.description}
+                  </p>
+
+                  {/* Accent */}
+                  <div className="flex items-center justify-center space-x-2 mb-4">
+                    <Globe className="h-4 w-4 text-blue-300" />
+                    <span className="text-blue-200 text-sm">{interviewer.accent}</span>
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className="flex items-center justify-between mb-6 px-4">
+                  <div className="text-center">
+                    <div className="flex items-center space-x-1 mb-1">
+                      <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                      <span className="text-white font-bold">{interviewer.rating}</span>
+                    </div>
+                    <span className="text-blue-200 text-xs">Rating</span>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-white font-bold mb-1">
+                      {interviewer.interviews.toLocaleString()}
+                    </div>
+                    <span className="text-blue-200 text-xs">Interviews</span>
+                  </div>
+                </div>
+
+                {/* Expertise Tags */}
+                <div className="space-y-2">
+                  <div className="text-blue-200 text-xs font-medium text-center mb-2">
+                    Expertise:
+                  </div>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {interviewer.expertise.slice(0, 2).map((skill, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-white/20 text-blue-100 text-xs rounded-full border border-white/30"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                    {interviewer.expertise.length > 2 && (
+                      <span className="px-3 py-1 bg-white/20 text-blue-100 text-xs rounded-full border border-white/30">
+                        +{interviewer.expertise.length - 2} more
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="text-center">
+            {selectedAgent ? (
+              <div className="space-y-4">
+                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 max-w-md mx-auto border border-white/20">
+                  <div className="flex items-center space-x-4">
+                    <div
+                      className={`w-12 h-12 bg-gradient-to-br ${selectedAgent.color} rounded-xl flex items-center justify-center text-xl shadow-lg`}
+                    >
+                      {selectedAgent.avatar}
+                    </div>
+                    <div className="text-left">
+                      <div className="text-white font-semibold">{selectedAgent.name}</div>
+                      <div className="text-blue-200 text-sm">{selectedAgent.title}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={startInterview}
+                  disabled={isLoading}
+                  className="inline-flex items-center space-x-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:from-gray-500 disabled:to-gray-600 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-200 shadow-2xl hover:shadow-3xl transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed text-lg"
+                >
+                  {isLoading ? (
+                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent" />
+                  ) : (
+                    <Phone className="h-6 w-6" />
+                  )}
+                  <span>
+                    {isLoading ? 'Connecting...' : `Start Interview with ${selectedAgent.name}`}
+                  </span>
                 </button>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 max-w-md mx-auto border border-white/20">
+                <MessageSquare className="h-12 w-12 text-blue-300 mx-auto mb-4" />
+                <p className="text-blue-200">Please select an interviewer to begin your session</p>
+              </div>
+            )}
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+  // Main Interview Interface
+  return (
+    <div className={`${isFullscreen ? 'fixed inset-0 z-50' : 'h-full'} bg-slate-900 text-white flex flex-col`}>
+      {/* Top Bar */}
+      <div className="flex items-center justify-between p-4 bg-slate-800 border-b border-slate-700">
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={backToSelection}
+            className="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors bg-slate-700 rounded-lg px-3 py-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Change Interviewer</span>
+          </button>
+          
+          <div className="flex items-center space-x-2">
+            <div className={`w-3 h-3 rounded-full ${
+              isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'
+            }`} />
+            <span className="text-sm font-medium">
+              {connectionStatus}
+            </span>
           </div>
           
-          {error && (
-            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
-              <div className="flex items-center space-x-2">
-                <AlertCircle className="h-5 w-5 text-red-500" />
-                <p className="text-red-700">{error}</p>
+          {isConnected && selectedAgent && (
+            <div className="flex items-center space-x-3">
+              <div className={`w-8 h-8 bg-gradient-to-br ${selectedAgent.color} rounded-lg flex items-center justify-center text-sm`}>
+                {selectedAgent.avatar}
               </div>
+              <span className="text-sm text-slate-300">
+                Interviewing with {selectedAgent.name}
+              </span>
+            </div>
+          )}
+          
+          {isConnected && (
+            <div className="flex items-center space-x-2 text-sm text-slate-400">
+              <Clock className="h-4 w-4" />
+              <span className="font-mono">{formatDuration(sessionDuration)}</span>
             </div>
           )}
         </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Interview Controls */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-              <div className="flex items-center space-x-3 mb-6">
-                <Settings className="h-6 w-6 text-blue-600" />
-                <h2 className="text-xl font-semibold text-gray-900">Interview Controls</h2>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setShowTranscript(!showTranscript)}
+            className={`p-2 rounded-lg transition-colors ${
+              showTranscript ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:text-white'
+            }`}
+            title="Toggle Transcript"
+          >
+            <MessageSquare className="h-4 w-4" />
+          </button>
+          <button
+            onClick={toggleFullscreen}
+            className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+            title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+          >
+            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          </button>
+          <button className="p-2 hover:bg-slate-700 rounded-lg transition-colors">
+            <MoreVertical className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Video Area */}
+        <div className={`${showTranscript ? 'flex-1' : 'w-full'} flex flex-col`}>
+          {/* Participants Grid */}
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
+            {/* AI Interviewer */}
+            <div className="relative bg-slate-800 rounded-xl overflow-hidden border-2 border-slate-700">
+              <div className="absolute inset-0 flex items-center justify-center">
+                {selectedAgent && (
+                  <div className={`w-32 h-32 bg-gradient-to-br ${selectedAgent.color} rounded-full flex items-center justify-center shadow-2xl text-4xl ${
+                    isSpeaking.assistant ? 'animate-pulse ring-4 ring-green-400' : ''
+                  }`}>
+                    {selectedAgent.avatar}
+                  </div>
+                )}
               </div>
               
-              {!isConnected ? (
-                <div className="space-y-6">
-                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-                    <h3 className="font-semibold text-blue-900 mb-4 flex items-center">
-                      <CheckCircle className="h-5 w-5 mr-2" />
-                      Before You Start:
-                    </h3>
-                    <ul className="text-blue-800 space-y-3">
-                      <li className="flex items-start space-x-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>Ensure your microphone is working properly</span>
-                      </li>
-                      <li className="flex items-start space-x-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>Find a quiet, distraction-free environment</span>
-                      </li>
-                      <li className="flex items-start space-x-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>Speak clearly and at a normal pace</span>
-                      </li>
-                      <li className="flex items-start space-x-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>Be prepared to discuss your skills and experience</span>
-                      </li>
-                    </ul>
-                  </div>
-                  
-                  <button
-                    onClick={startInterview}
-                    disabled={isLoading}
-                    className="w-full flex items-center justify-center space-x-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
-                  >
-                    {isLoading ? (
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white" />
-                    ) : (
-                      <>
-                        <Phone className="h-6 w-6" />
-                        <span className="text-lg">Start Interview</span>
-                      </>
-                    )}
-                  </button>
+              {/* AI Status */}
+              <div className="absolute top-4 left-4">
+                <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  isSpeaking.assistant ? 'bg-green-500 text-white' : 'bg-slate-700 text-slate-300'
+                }`}>
+                  {isSpeaking.assistant ? 'Speaking...' : 'Listening'}
                 </div>
-              ) : (
-                <div className="space-y-6">
-                  <div className="bg-green-50 border border-green-200 rounded-xl p-6">
-                    <h3 className="font-semibold text-green-900 mb-3 flex items-center">
-                      <Zap className="h-5 w-5 mr-2" />
-                      Interview Active
-                    </h3>
-                    <p className="text-green-800">
-                      The AI interviewer is ready. Listen carefully and respond naturally to the questions.
-                    </p>
+              </div>
+              
+              {/* AI Label */}
+              <div className="absolute bottom-4 left-4">
+                <div className="bg-slate-900/80 backdrop-blur-sm rounded-lg px-3 py-1">
+                  <span className="text-white text-sm font-medium">
+                    {selectedAgent?.name} (AI Interviewer)
+                  </span>
+                </div>
+              </div>
+
+              {/* Live AI Transcript */}
+              {liveTranscript.assistant && (
+                <div className="absolute bottom-16 left-4 right-4">
+                  <div className="bg-slate-900/90 backdrop-blur-sm rounded-lg p-3 border border-slate-600">
+                    <div className="text-green-400 text-xs font-medium mb-1">AI Speaking:</div>
+                    <div className="text-white text-sm">{liveTranscript.assistant}</div>
                   </div>
-                  
-                  <button
-                    onClick={endInterview}
-                    disabled={isLoading}
-                    className="w-full flex items-center justify-center space-x-3 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
-                  >
-                    {isLoading ? (
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white" />
-                    ) : (
-                      <>
-                        <PhoneOff className="h-6 w-6" />
-                        <span className="text-lg">End Interview</span>
-                      </>
-                    )}
-                  </button>
-                  
-                  <div className="pt-6 border-t border-gray-200">
-                    <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
-                      <MessageSquare className="h-5 w-5 mr-2" />
-                      Quick Tips:
-                    </h4>
-                    <ul className="text-gray-600 space-y-2">
-                      <li className="flex items-start space-x-2">
-                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>Take your time to think before responding</span>
-                      </li>
-                      <li className="flex items-start space-x-2">
-                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>Provide specific examples from your experience</span>
-                      </li>
-                      <li className="flex items-start space-x-2">
-                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>Ask for clarification if a question is unclear</span>
-                      </li>
-                      <li className="flex items-start space-x-2">
-                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>Stay confident and maintain a positive attitude</span>
-                      </li>
-                    </ul>
+                </div>
+              )}
+            </div>
+
+            {/* User */}
+            <div className="relative bg-slate-800 rounded-xl overflow-hidden border-2 border-slate-700">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className={`w-32 h-32 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center shadow-2xl ${
+                  isSpeaking.user ? 'animate-pulse ring-4 ring-blue-400' : ''
+                }`}>
+                  <User className="h-16 w-16 text-white" />
+                </div>
+              </div>
+              
+              {/* User Status */}
+              <div className="absolute top-4 left-4">
+                <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  isSpeaking.user ? 'bg-blue-500 text-white' : 'bg-slate-700 text-slate-300'
+                }`}>
+                  {isSpeaking.user ? 'Speaking...' : 'Listening'}
+                </div>
+              </div>
+              
+              {/* Muted Indicator */}
+              {isMuted && (
+                <div className="absolute top-4 right-4">
+                  <div className="bg-red-500 rounded-full p-2">
+                    <MicOff className="h-4 w-4 text-white" />
+                  </div>
+                </div>
+              )}
+              
+              {/* User Label */}
+              <div className="absolute bottom-4 left-4">
+                <div className="bg-slate-900/80 backdrop-blur-sm rounded-lg px-3 py-1">
+                  <span className="text-white text-sm font-medium">You</span>
+                </div>
+              </div>
+
+              {/* Live User Transcript */}
+              {liveTranscript.user && (
+                <div className="absolute bottom-16 left-4 right-4">
+                  <div className="bg-slate-900/90 backdrop-blur-sm rounded-lg p-3 border border-slate-600">
+                    <div className="text-blue-400 text-xs font-medium mb-1">You're saying:</div>
+                    <div className="text-white text-sm">{liveTranscript.user}</div>
                   </div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Conversation Display */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-md border border-gray-200 flex flex-col h-[600px]">
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center space-x-3">
-                  <MessageSquare className="h-6 w-6 text-blue-600" />
-                  <h2 className="text-xl font-semibold text-gray-900">Live Conversation</h2>
-                  {isConnected && (
-                    <div className="flex items-center space-x-2 ml-auto">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <span className="text-green-600 text-sm font-medium">Live</span>
-                    </div>
+          {/* Control Bar */}
+          <div className="bg-slate-800 border-t border-slate-700 p-4">
+            <div className="flex items-center justify-center space-x-4">
+              {/* Mute Button */}
+              <button
+                onClick={toggleMute}
+                disabled={!isConnected}
+                className={`p-4 rounded-full transition-all duration-200 ${
+                  isMuted 
+                    ? 'bg-red-500 hover:bg-red-600' 
+                    : 'bg-slate-700 hover:bg-slate-600'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                title={isMuted ? 'Unmute' : 'Mute'}
+              >
+                {isMuted ? <MicOff className="h-6 w-6 text-white" /> : <Mic className="h-6 w-6 text-white" />}
+              </button>
+
+              {/* Video Button */}
+              <button
+                onClick={() => setIsVideoOn(!isVideoOn)}
+                className={`p-4 rounded-full transition-all duration-200 ${
+                  !isVideoOn 
+                    ? 'bg-red-500 hover:bg-red-600' 
+                    : 'bg-slate-700 hover:bg-slate-600'
+                }`}
+                title={isVideoOn ? 'Turn off video' : 'Turn on video'}
+              >
+                {isVideoOn ? <Video className="h-6 w-6 text-white" /> : <VideoOff className="h-6 w-6 text-white" />}
+              </button>
+
+              {/* Main Call Button */}
+              {!isConnected ? (
+                <button
+                  onClick={startInterview}
+                  disabled={isLoading}
+                  className="p-4 bg-green-500 hover:bg-green-600 disabled:bg-slate-600 rounded-full transition-all duration-200 disabled:cursor-not-allowed"
+                  title="Start Interview"
+                >
+                  {isLoading ? (
+                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent" />
+                  ) : (
+                    <Phone className="h-6 w-6 text-white" />
                   )}
-                </div>
-              </div>
-              
-              <div className="flex-1 overflow-y-auto p-6">
-                {conversation.length === 0 && !currentTranscript ? (
-                  <div className="flex flex-col items-center justify-center h-full text-center">
-                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
-                      <Bot className="h-10 w-10 text-white" />
-                    </div>
-                    <h3 className="text-2xl font-semibold text-gray-900 mb-3">Ready for Your Interview</h3>
-                    <p className="text-gray-600 max-w-md leading-relaxed">
-                      Click "Start Interview" to begin your AI-powered interview session. 
-                      The conversation will appear here in real-time with live transcription.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {conversation.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div className={`flex items-start space-x-4 max-w-2xl ${
-                          message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''
-                        }`}>
-                          <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center shadow-md ${
-                            message.type === 'user' 
-                              ? 'bg-gradient-to-br from-blue-500 to-cyan-600' 
-                              : 'bg-gradient-to-br from-purple-500 to-pink-600'
-                          }`}>
-                            {message.type === 'user' ? <User className="h-5 w-5 text-white" /> : <Bot className="h-5 w-5 text-white" />}
-                          </div>
-                          
-                          <div className={`rounded-2xl px-6 py-4 shadow-md ${
-                            message.type === 'user'
-                              ? 'bg-gradient-to-br from-blue-500 to-cyan-600 text-white'
-                              : 'bg-gray-100 text-gray-900'
-                          }`}>
-                            <div className="whitespace-pre-wrap leading-relaxed">{message.content}</div>
-                            <div className={`text-xs mt-3 ${
-                              message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
-                            }`}>
-                              {message.timestamp.toLocaleTimeString()}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {/* Current Transcript */}
-                    {currentTranscript && (
-                      <div className={`flex ${isUserSpeaking ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`flex items-start space-x-4 max-w-2xl ${
-                          isUserSpeaking ? 'flex-row-reverse space-x-reverse' : ''
-                        }`}>
-                          <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center shadow-md ${
-                            isUserSpeaking 
-                              ? 'bg-gradient-to-br from-blue-500 to-cyan-600' 
-                              : 'bg-gradient-to-br from-purple-500 to-pink-600'
-                          }`}>
-                            {isUserSpeaking ? <User className="h-5 w-5 text-white" /> : <Bot className="h-5 w-5 text-white" />}
-                          </div>
-                          
-                          <div className={`rounded-2xl px-6 py-4 shadow-md border-2 border-dashed ${
-                            isUserSpeaking
-                              ? 'bg-blue-50 text-blue-900 border-blue-300'
-                              : 'bg-purple-50 text-purple-900 border-purple-300'
-                          }`}>
-                            <div className="flex items-center space-x-2 mb-2">
-                              <div className="flex space-x-1">
-                                <div className="w-1 h-1 bg-current rounded-full animate-bounce"></div>
-                                <div className="w-1 h-1 bg-current rounded-full animate-bounce animation-delay-100"></div>
-                                <div className="w-1 h-1 bg-current rounded-full animate-bounce animation-delay-200"></div>
-                              </div>
-                              <span className="text-xs opacity-75">
-                                {isUserSpeaking ? 'You are speaking...' : 'AI is speaking...'}
-                              </span>
-                            </div>
-                            <div className="whitespace-pre-wrap leading-relaxed opacity-90">
-                              {currentTranscript}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    <div ref={conversationEndRef} />
-                  </div>
-                )}
-              </div>
+                </button>
+              ) : (
+                <button
+                  onClick={endInterview}
+                  disabled={isLoading}
+                  className="p-4 bg-red-500 hover:bg-red-600 disabled:bg-slate-600 rounded-full transition-all duration-200 disabled:cursor-not-allowed"
+                  title="End Interview"
+                >
+                  {isLoading ? (
+                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent" />
+                  ) : (
+                    <PhoneOff className="h-6 w-6 text-white" />
+                  )}
+                </button>
+              )}
+
+              {/* Share Screen Button */}
+              <button
+                className="p-4 bg-slate-700 hover:bg-slate-600 rounded-full transition-all duration-200"
+                title="Share Screen"
+              >
+                <Monitor className="h-6 w-6 text-white" />
+              </button>
+
+              {/* Participants Button */}
+              <button
+                className="p-4 bg-slate-700 hover:bg-slate-600 rounded-full transition-all duration-200"
+                title="Participants"
+              >
+                <Users className="h-6 w-6 text-white" />
+              </button>
             </div>
           </div>
         </div>
+
+        {/* Live Transcript Sidebar */}
+        {showTranscript && (
+          <div className="w-80 bg-slate-800 border-l border-slate-700 flex flex-col">
+            <div className="p-4 border-b border-slate-700">
+              <h3 className="text-lg font-semibold text-white flex items-center">
+                <MessageSquare className="h-5 w-5 mr-2" />
+                Live Transcript
+              </h3>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {conversation.map((message) => (
+                <div key={message.id} className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
+                      message.type === 'user' 
+                        ? 'bg-blue-500 text-white' 
+                        : selectedAgent 
+                          ? `bg-gradient-to-br ${selectedAgent.color} text-white`
+                          : 'bg-slate-600 text-white'
+                    }`}>
+                      {message.type === 'user' ? 'U' : selectedAgent?.avatar || 'AI'}
+                    </div>
+                    <span className="text-xs text-slate-400">
+                      {message.type === 'user' ? 'You' : selectedAgent?.name || 'AI'}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      {message.timestamp.toLocaleTimeString()}
+                    </span>
+                  </div>
+                  <div className="text-sm text-slate-200 ml-8 leading-relaxed">
+                    {message.content}
+                  </div>
+                </div>
+              ))}
+              <div ref={conversationEndRef} />
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2">
+            <AlertCircle className="h-5 w-5" />
+            <span>{error}</span>
+            <button 
+              onClick={() => setError(null)}
+              className="ml-4 hover:bg-red-600 rounded p-1"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -163,7 +163,7 @@ const Chat: React.FC = () => {
     speechSynthesisRef.current.speak(utterance);
   };
 
-  const typewriterEffect = (text: string, messageId: string, speed: number = 20) => {
+  const typewriterEffect = (text: string, messageId: string, speed: number = 10) => {
     let index = 0;
     setTypewriterText(prev => ({ ...prev, [messageId]: '' }));
     
@@ -204,19 +204,19 @@ const Chat: React.FC = () => {
 
     try {
       let response = '';
+      let enhancedPrompt = textToSend;
       
       if (searchMode === 'web') {
-        const webPrompt = `Please search the web for current information about: ${textToSend}. Provide a comprehensive answer with relevant links.`;
-        response = await geminiService.chatWithAI(webPrompt, selectedImage || undefined);
+        enhancedPrompt = `Please search the web for current information about: ${textToSend}. Provide a comprehensive, detailed answer with relevant links. Include multiple perspectives and thorough explanations.`;
       } else if (searchMode === 'study') {
-        const studyPrompt = `As an educational tutor, please help with this learning request: ${textToSend}. Provide detailed explanations, examples, and educational resources.`;
-        response = await geminiService.chatWithAI(studyPrompt, selectedImage || undefined);
+        enhancedPrompt = `As an educational tutor, please help with this learning request: ${textToSend}. Provide comprehensive, detailed explanations with examples, step-by-step breakdowns, practical applications, and educational resources. Make your response thorough and educational.`;
       } else if (searchMode === 'deep') {
-        const deepPrompt = `Provide a comprehensive, in-depth analysis of: ${textToSend}. Include multiple perspectives, detailed explanations, and thorough research.`;
-        response = await geminiService.chatWithAI(deepPrompt, selectedImage || undefined);
+        enhancedPrompt = `Provide a comprehensive, in-depth analysis of: ${textToSend}. Include multiple perspectives, detailed explanations, thorough research, examples, case studies, and practical implications. Make your response extensive and well-researched.`;
       } else {
-        response = await geminiService.chatWithAI(textToSend, selectedImage || undefined);
+        enhancedPrompt = `Please provide a comprehensive and detailed response to: ${textToSend}. Include relevant examples, explanations, and context. Adjust the length and depth of your response based on the complexity and scope of the question.`;
       }
+      
+      response = await geminiService.chatWithAI(enhancedPrompt, selectedImage || undefined);
       
       const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -228,9 +228,6 @@ const Chat: React.FC = () => {
       const updatedMessages = [...newMessages, aiMessage];
       setMessages(updatedMessages);
       storageService.saveChatMessage(aiMessage);
-      
-      // Start typewriter effect for AI response
-      typewriterEffect(response, aiMessage.id);
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage: ChatMessage = {
@@ -383,6 +380,8 @@ const Chat: React.FC = () => {
                               ? typewriterText[message.id] 
                               : message.content
                             } 
+                            messageId={message.id}
+                            showActions={typewriterText[message.id] === undefined}
                           />
                         ) : (
                           <div className="whitespace-pre-wrap">{message.content}</div>

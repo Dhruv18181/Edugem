@@ -13,9 +13,13 @@ import {
   Linkedin,
   Github,
   User,
-  Gamepad2,
+  GraduationCap,
   Menu,
-  X
+  X,
+  Brain,
+  Zap,
+  BookOpen,
+  TrendingUp
 } from 'lucide-react';
 
 const AboutPage: React.FC = () => {
@@ -24,24 +28,24 @@ const AboutPage: React.FC = () => {
   const teamMembers = [
     {
       name: 'Rishi Singh',
-      role: 'Team Leader & Developer',
-      description: 'Visionary leader with 8+ years of experience in educational technology. Passionate about creating innovative solutions that make learning accessible and engaging for everyone.',
-      skills: ['Leadership', 'Full-Stack Development', 'Product Strategy', 'Team Management'],
+      role: 'Team Leader & Full-Stack Developer',
+      description: 'Visionary leader with 8+ years of experience in educational technology. Passionate about creating innovative AI-powered solutions that make learning accessible and engaging for everyone.',
+      skills: ['Leadership', 'Full-Stack Development', 'AI Integration', 'Product Strategy'],
       image: '/Rishi.jpg',
       social: {
-        email: 'rishi@edugame.com',
+        email: 'rishi@edugem.com',
         linkedin: '#',
         github: '#'
       }
     },
     {
       name: 'Armaan Patel',
-      role: 'Developer',
-      description: 'Expert developer specializing in scalable web applications and game development. Brings technical excellence and innovative problem-solving to every project.',
-      skills: ['React', 'Node.js', 'Game Development', 'Database Design'],
+      role: 'Backend Developer & AI Specialist',
+      description: 'Expert developer specializing in scalable backend systems and AI integration. Brings technical excellence and innovative problem-solving to create robust educational platforms.',
+      skills: ['Node.js', 'AI/ML', 'Database Design', 'API Development'],
       image: null,
       social: {
-        email: 'armaan@edugame.com',
+        email: 'armaan@edugem.com',
         linkedin: '#',
         github: '#'
       }
@@ -49,65 +53,65 @@ const AboutPage: React.FC = () => {
     {
       name: 'Sushil',
       role: 'UI/UX Designer',
-      description: 'Creative designer focused on user-centered design and creating intuitive, beautiful interfaces that enhance the learning experience.',
+      description: 'Creative designer focused on user-centered design and creating intuitive, beautiful interfaces that enhance the learning experience and make education more accessible.',
       skills: ['UI/UX Design', 'User Research', 'Prototyping', 'Design Systems'],
       image: null,
       social: {
-        email: 'sushil@edugame.com',
+        email: 'sushil@edugem.com',
         linkedin: '#',
         github: '#'
       }
     }
+    
   ];
 
   const values = [
     {
       icon: Lightbulb,
       title: 'Innovation',
-      description: 'We constantly push the boundaries of educational technology to create groundbreaking learning experiences.'
+      description: 'We constantly push the boundaries of educational technology to create groundbreaking AI-powered learning experiences.'
     },
     {
       icon: Heart,
       title: 'Passion',
-      description: 'Our love for education and technology drives us to create products that truly make a difference.'
+      description: 'Our love for education and technology drives us to create products that truly make a difference in students\' lives.'
     },
     {
       icon: Users,
       title: 'Community',
-      description: 'We believe in the power of collaborative learning and building strong educational communities.'
+      description: 'We believe in the power of collaborative learning and building strong educational communities worldwide.'
     },
     {
       icon: Award,
       title: 'Excellence',
-      description: 'We strive for the highest quality in everything we do, from code to user experience.'
+      description: 'We strive for the highest quality in everything we do, from AI algorithms to user experience design.'
     }
   ];
 
-  const milestones = [
+  const achievements = [
     {
-      year: '2020',
-      title: 'Company Founded',
-      description: 'EduGame was born from a vision to revolutionize education through gaming.'
-    },
-    {
-      year: '2021',
-      title: 'First Product Launch',
-      description: 'Launched our first educational game, reaching 1,000 students in the first month.'
-    },
-    {
-      year: '2022',
-      title: 'Major Expansion',
-      description: 'Expanded to serve 10,000+ students across 15 countries worldwide.'
+      year: '2023',
+      title: 'Platform Launch',
+      description: 'EduGem was born from a vision to revolutionize education through AI technology.',
+      icon: Rocket
     },
     {
       year: '2023',
       title: 'AI Integration',
-      description: 'Introduced AI-powered adaptive learning, personalizing education for each student.'
+      description: 'Successfully integrated advanced AI tutors and personalized learning algorithms.',
+      icon: Brain
     },
     {
       year: '2024',
-      title: 'Global Recognition',
-      description: 'Recognized as the leading educational gaming platform with 50,000+ active users.'
+      title: 'Global Expansion',
+      description: 'Expanded to serve 50,000+ students across 40+ countries worldwide.',
+      icon: Globe
+    },
+    {
+      year: '2024',
+      title: 'Recognition',
+      description: 'Recognized as a leading AI-powered educational platform with 95% student satisfaction.',
+      icon: Award
     }
   ];
 
@@ -120,16 +124,16 @@ const AboutPage: React.FC = () => {
             {/* Logo */}
             <Link to="/landing" className="flex items-center space-x-3 group">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center transform group-hover:scale-105 transition-transform duration-200">
-                <Gamepad2 className="h-6 w-6 text-white" />
+                <GraduationCap className="h-6 w-6 text-white" />
               </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                EduGame
+                EduGem
               </span>
             </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
-              <Link to="/landing" className="text-gray-700 hover:text-blue-600 transition-colors duration-200">
+              <Link to="/" className="text-gray-700 hover:text-blue-600 transition-colors duration-200">
                 Home
               </Link>
               <Link to="/about" className="text-blue-600 font-medium">
@@ -168,7 +172,7 @@ const AboutPage: React.FC = () => {
           <div className="md:hidden bg-white border-t border-gray-100 shadow-lg">
             <div className="px-4 py-6 space-y-4">
               <Link
-                to="/landing"
+                to="/"
                 onClick={() => setIsMenuOpen(false)}
                 className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors duration-200"
               >
@@ -208,18 +212,18 @@ const AboutPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              About <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">EduGame</span>
+              About <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">EduGem</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              We're on a mission to transform education by making learning as engaging and addictive as gaming. 
-              Our platform combines cutting-edge technology with proven educational methodologies.
+              We're on a mission to transform education by making learning as engaging and effective as possible through 
+              cutting-edge AI technology and personalized learning experiences.
             </p>
           </div>
           
           <div className="relative">
             <img 
-              src="https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1200&h=600&fit=crop" 
-              alt="EduGame team collaboration"
+              src="https://images.pexels.com/photos/5212345/pexels-photo-5212345.jpeg?auto=compress&cs=tinysrgb&w=1200&h=600&fit=crop" 
+              alt="EduGem AI-powered learning platform"
               className="rounded-2xl shadow-2xl w-full h-96 object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl" />
@@ -238,28 +242,27 @@ const AboutPage: React.FC = () => {
               </h2>
               <div className="space-y-6 text-gray-600 leading-relaxed">
                 <p>
-                  EduGame was founded in 2020 with a simple yet powerful vision: to make learning as engaging 
-                  and enjoyable as playing your favorite video game. Our founders, frustrated with traditional 
-                  educational methods, saw an opportunity to leverage the addictive nature of gaming to create 
-                  meaningful educational experiences.
+                  EduGem was founded in 2023 with a simple yet powerful vision: to make learning as personalized 
+                  and effective as having a dedicated tutor for every student. Our founders, frustrated with 
+                  traditional one-size-fits-all educational methods, saw an opportunity to leverage AI technology 
+                  to create truly adaptive learning experiences.
                 </p>
                 <p>
-                  What started as a small project in a garage has now grown into a global platform serving 
-                  thousands of students worldwide. We've proven that when education meets entertainment, 
-                  magic happens. Students don't just learn—they thrive, explore, and develop a genuine 
-                  love for knowledge.
+                  What started as a small project has now grown into a comprehensive AI-powered educational platform 
+                  serving thousands of students worldwide. We've proven that when artificial intelligence meets 
+                  educational expertise, learning becomes more engaging, effective, and accessible to everyone.
                 </p>
                 <p>
-                  Today, EduGame continues to push the boundaries of educational technology, incorporating 
-                  AI, adaptive learning, and immersive experiences to create the future of education.
+                  Today, EduGem continues to push the boundaries of educational technology, incorporating advanced AI, 
+                  voice interaction, and personalized learning paths to create the future of education.
                 </p>
               </div>
             </div>
             
             <div className="relative">
               <img 
-                src="https://images.pexels.com/photos/3184639/pexels-photo-3184639.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop" 
-                alt="Educational innovation"
+                src="https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop" 
+                alt="AI-powered educational innovation"
                 className="rounded-2xl shadow-xl"
               />
               <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl opacity-20" />
@@ -277,8 +280,8 @@ const AboutPage: React.FC = () => {
               Our Mission
             </h2>
             <p className="text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed font-medium">
-              "To democratize quality education by creating engaging, accessible, and effective learning 
-              experiences that inspire curiosity, foster creativity, and empower learners to reach their full potential."
+              "To democratize quality education by creating AI-powered, personalized learning experiences 
+              that adapt to each student's unique needs, learning style, and pace."
             </p>
           </div>
           
@@ -300,44 +303,35 @@ const AboutPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Timeline */}
+      {/* Key Achievements */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Our Journey
+              Key Achievements
             </h2>
             <p className="text-xl text-gray-600">
-              Key milestones in our mission to transform education
+              Milestones in our mission to transform education through AI
             </p>
           </div>
           
-          <div className="relative">
-            <div className="absolute left-1/2 transform -translate-x-px h-full w-0.5 bg-gradient-to-b from-blue-500 to-purple-600" />
-            
-            <div className="space-y-12">
-              {milestones.map((milestone, index) => (
-                <div key={index} className={`relative flex items-center ${
-                  index % 2 === 0 ? 'justify-start' : 'justify-end'
-                }`}>
-                  <div className={`w-5/12 ${index % 2 === 0 ? 'pr-8 text-right' : 'pl-8 text-left'}`}>
-                    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-                      <div className="text-2xl font-bold text-blue-600 mb-2">
-                        {milestone.year}
-                      </div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                        {milestone.title}
-                      </h3>
-                      <p className="text-gray-600">
-                        {milestone.description}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full border-4 border-white shadow-lg" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {achievements.map((achievement, index) => (
+              <div key={index} className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mb-4">
+                  <achievement.icon className="h-6 w-6 text-white" />
                 </div>
-              ))}
-            </div>
+                <div className="text-2xl font-bold text-blue-600 mb-2">
+                  {achievement.year}
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  {achievement.title}
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  {achievement.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -350,25 +344,23 @@ const AboutPage: React.FC = () => {
               Meet Our Team
             </h2>
             <p className="text-xl text-gray-600">
-              The passionate individuals behind EduGame's success
+              The passionate individuals behind EduGem's AI-powered learning revolution
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {teamMembers.map((member, index) => (
               <div key={index} className="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                <div className="relative">
+                <div className="relative h-64 overflow-hidden">
                   {member.image ? (
-                    <div className="w-full h-64 overflow-hidden">
-                      <img 
-                        src={member.image} 
-                        alt={member.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
+                    <img 
+                      src={member.image} 
+                      alt={member.name}
+                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                    />
                   ) : (
-                    <div className="w-full h-64 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                      <User className="h-24 w-24 text-white opacity-50" />
+                    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center relative">
+                      <User className="h-20 w-20 text-white opacity-50" />
                       <div className="absolute inset-0 bg-black/20" />
                       <div className="absolute bottom-4 left-4 text-white">
                         <div className="text-sm opacity-75">Photo Coming Soon</div>
@@ -384,7 +376,7 @@ const AboutPage: React.FC = () => {
                   <div className="text-blue-600 font-semibold mb-4">
                     {member.role}
                   </div>
-                  <p className="text-gray-600 mb-6 leading-relaxed">
+                  <p className="text-gray-600 mb-6 leading-relaxed text-sm">
                     {member.description}
                   </p>
                   
@@ -426,6 +418,43 @@ const AboutPage: React.FC = () => {
         </div>
       </section>
 
+      {/* Technology Stack */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+              Our Technology
+            </h2>
+            <p className="text-xl text-gray-600">
+              Built with cutting-edge AI and modern web technologies
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="text-center p-6 bg-gray-50 rounded-2xl hover:shadow-lg transition-all duration-300">
+              <Brain className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-gray-900 mb-2">AI & Machine Learning</h3>
+              <p className="text-sm text-gray-600">Advanced AI models for personalized learning</p>
+            </div>
+            <div className="text-center p-6 bg-gray-50 rounded-2xl hover:shadow-lg transition-all duration-300">
+              <Zap className="h-12 w-12 text-purple-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-gray-900 mb-2">Real-time Processing</h3>
+              <p className="text-sm text-gray-600">Instant feedback and adaptive responses</p>
+            </div>
+            <div className="text-center p-6 bg-gray-50 rounded-2xl hover:shadow-lg transition-all duration-300">
+              <BookOpen className="h-12 w-12 text-green-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-gray-900 mb-2">Content Generation</h3>
+              <p className="text-sm text-gray-600">AI-powered educational content creation</p>
+            </div>
+            <div className="text-center p-6 bg-gray-50 rounded-2xl hover:shadow-lg transition-all duration-300">
+              <TrendingUp className="h-12 w-12 text-orange-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-gray-900 mb-2">Analytics</h3>
+              <p className="text-sm text-gray-600">Detailed learning progress tracking</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-blue-600 to-purple-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -434,8 +463,8 @@ const AboutPage: React.FC = () => {
             Join Our Mission
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Be part of the educational revolution. Whether you're an educator, student, or parent, 
-            there's a place for you in the EduGame community.
+            Be part of the educational revolution. Whether you're a student, educator, or lifelong learner, 
+            there's a place for you in the EduGem community.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link 
@@ -448,7 +477,7 @@ const AboutPage: React.FC = () => {
               to="/landing"
               className="px-8 py-4 border-2 border-white text-white font-semibold rounded-xl hover:bg-white hover:text-blue-600 transition-all duration-200 inline-block"
             >
-              Contact Us
+              Learn More
             </Link>
           </div>
         </div>
@@ -460,15 +489,15 @@ const AboutPage: React.FC = () => {
           <div className="text-center">
             <div className="flex items-center justify-center space-x-3 mb-4">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                <Gamepad2 className="h-6 w-6 text-white" />
+                <GraduationCap className="h-6 w-6 text-white" />
               </div>
-              <span className="text-2xl font-bold">EduGame</span>
+              <span className="text-2xl font-bold">EduGem</span>
             </div>
             <p className="text-gray-400 mb-6 max-w-md mx-auto">
-              Transform learning into an engaging adventure with our premium educational gaming platform.
+              Transform your learning journey with AI-powered education technology.
             </p>
             <div className="flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-8 text-sm text-gray-400">
-              <p>© 2024 EduGame. All rights reserved.</p>
+              <p>© 2024 EduGem. All rights reserved.</p>
               <p>Made with ❤️ for better education</p>
             </div>
           </div>

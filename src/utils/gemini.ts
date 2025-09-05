@@ -184,7 +184,7 @@ export class GeminiService {
               });
             }
             
-            searchContext += `\nPlease provide a comprehensive answer based on these search results. Make sure to include relevant clickable links in your response.`;
+            searchContext += `\nPlease provide a concise, focused answer based on these search results. Include the most relevant links. Keep it brief unless the user specifically asks for detailed information.`;
             
             const result = await this.model.generateContent(searchContext);
             return result.response.text();
@@ -194,7 +194,18 @@ export class GeminiService {
         }
       }
 
-      let prompt = `You are an educational AI assistant. Help the student with their question: ${message}`;
+      // Check if user is asking for detailed/comprehensive response
+      const wantsDetailed = message.toLowerCase().includes('detailed') || 
+                           message.toLowerCase().includes('comprehensive') || 
+                           message.toLowerCase().includes('explain in detail') ||
+                           message.toLowerCase().includes('elaborate') ||
+                           message.toLowerCase().includes('in depth') ||
+                           message.toLowerCase().includes('thoroughly') ||
+                           message.toLowerCase().includes('step by step');
+
+      let prompt = wantsDetailed 
+        ? `You are an educational AI assistant. Provide a comprehensive, detailed explanation for: ${message}. Include examples, step-by-step breakdowns, and thorough explanations.`
+        : `You are an educational AI assistant. Provide a concise, clear, and direct answer to: ${message}. Keep it brief and to the point unless the question specifically requires detailed explanation.`;
       
       if (imageData) {
         const imageResult = await this.model.generateContent([
