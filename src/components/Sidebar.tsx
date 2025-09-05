@@ -153,8 +153,10 @@ const Sidebar: React.FC<SidebarProps> = ({ children }) => {
             </button>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2">
+          {/* Scrollable Content Area */}
+          <div className="flex-1 overflow-y-auto">
+            {/* Navigation */}
+            <nav className="px-4 py-6 space-y-2">
             {navItems.map(({ path, label, icon: Icon, description }) => (
               <Link
                 key={path}
@@ -185,46 +187,47 @@ const Sidebar: React.FC<SidebarProps> = ({ children }) => {
                 )}
               </Link>
             ))}
-          </nav>
+            </nav>
 
-          {/* Chat Actions (only show when on chat page) */}
-          {location.pathname === '/chat' && (
-            <div className={`px-4 py-4 border-t border-gray-200 space-y-2 flex-shrink-0 ${
-              isCollapsed ? 'lg:px-2' : ''
-            }`}>
-              <button
-                onClick={startNewChat}
-                className={`
-                  w-full flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 
-                  text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium
-                  ${isCollapsed ? 'lg:justify-center lg:px-2' : ''}
-                `}
-              >
-                <Plus className="h-4 w-4 flex-shrink-0" />
-                <span className={`transition-opacity duration-200 ${
-                  isCollapsed ? 'lg:opacity-0 lg:w-0' : 'opacity-100'
-                }`}>
-                  New Chat
-                </span>
-              </button>
-              
-              <button
-                onClick={clearChat}
-                className={`
-                  w-full flex items-center space-x-2 text-red-600 hover:bg-red-50 
-                  px-3 py-2 rounded-lg transition-colors text-sm
-                  ${isCollapsed ? 'lg:justify-center lg:px-2' : ''}
-                `}
-              >
-                <Trash2 className="h-4 w-4 flex-shrink-0" />
-                <span className={`transition-opacity duration-200 ${
-                  isCollapsed ? 'lg:opacity-0 lg:w-0' : 'opacity-100'
-                }`}>
-                  Clear Chat
-                </span>
-              </button>
-            </div>
-          )}
+            {/* Chat Actions (only show when on chat page) */}
+            {location.pathname === '/chat' && (
+              <div className={`px-4 py-4 border-t border-gray-200 space-y-2 ${
+                isCollapsed ? 'lg:px-2' : ''
+              }`}>
+                <button
+                  onClick={startNewChat}
+                  className={`
+                    w-full flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 
+                    text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium
+                    ${isCollapsed ? 'lg:justify-center lg:px-2' : ''}
+                  `}
+                >
+                  <Plus className="h-4 w-4 flex-shrink-0" />
+                  <span className={`transition-opacity duration-200 ${
+                    isCollapsed ? 'lg:opacity-0 lg:w-0' : 'opacity-100'
+                  }`}>
+                    New Chat
+                  </span>
+                </button>
+                
+                <button
+                  onClick={clearChat}
+                  className={`
+                    w-full flex items-center space-x-2 text-red-600 hover:bg-red-50 
+                    px-3 py-2 rounded-lg transition-colors text-sm
+                    ${isCollapsed ? 'lg:justify-center lg:px-2' : ''}
+                  `}
+                >
+                  <Trash2 className="h-4 w-4 flex-shrink-0" />
+                  <span className={`transition-opacity duration-200 ${
+                    isCollapsed ? 'lg:opacity-0 lg:w-0' : 'opacity-100'
+                  }`}>
+                    Clear Chat
+                  </span>
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Footer */}
           <div className="border-t border-gray-200 flex-shrink-0">
