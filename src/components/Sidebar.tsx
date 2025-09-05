@@ -189,7 +189,7 @@ const Sidebar: React.FC<SidebarProps> = ({ children }) => {
 
           {/* Chat Actions (only show when on chat page) */}
           {location.pathname === '/chat' && (
-            <div className={`px-4 py-4 border-t border-gray-200 space-y-2 ${
+            <div className={`px-4 py-4 border-t border-gray-200 space-y-2 flex-shrink-0 ${
               isCollapsed ? 'lg:px-2' : ''
             }`}>
               <button
@@ -227,7 +227,7 @@ const Sidebar: React.FC<SidebarProps> = ({ children }) => {
           )}
 
           {/* Footer */}
-          <div className="border-t border-gray-200">
+          <div className="border-t border-gray-200 flex-shrink-0">
             {/* User Profile Section */}
             <div className={`p-4 ${isCollapsed ? 'lg:px-2' : ''}`}>
               <div className={`${isCollapsed ? 'lg:hidden' : ''}`}>

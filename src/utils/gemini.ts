@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Question, AssessmentResult } from '../types';
+import { serperService } from './serperService';
 
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
@@ -154,6 +155,43 @@ export class GeminiService {
     try {
       if (!this.checkApiKey()) {
         return 'Please configure your Gemini API key in the .env file to use the AI chat feature. Set VITE_GEMINI_API_KEY with a valid Google Gemini API key.';
+      }
+
+      // Check if this is a web search request
+      const isWebSearchRequest = message.toLowerCase().includes('search') || 
+                                message.toLowerCase().includes('latest') ||
+                                message.toLowerCase().includes('current') ||
+                                message.toLowerCase().includes('news') ||
+                                message.toLowerCase().includes('recent');
+
+      if (isWebSearchRequest && !imageData) {
+        try {
+          const searchResults = await serperService.searchWithVideos(message);
+          if (searchResults.web.length > 0 || searchResults.videos.length > 0) {
+            let searchContext = `Based on current web search results for "${message}":\n\n`;
+            
+            if (searchResults.web.length > 0) {
+              searchContext += '**Web Results:**\n';
+              searchResults.web.slice(0, 5).forEach((result, index) => {
+                searchContext += `${index + 1}. [${result.title}](${result.link})\n   ${result.snippet}\n\n`;
+              });
+            }
+            
+            if (searchResults.videos.length > 0) {
+              searchContext += '**YouTube Videos:**\n';
+              searchResults.videos.slice(0, 3).forEach((video, index) => {
+                searchContext += `${index + 1}. [${video.title}](${video.link}) (${video.duration})\n   Channel: ${video.channel}\n   ${video.snippet}\n\n`;
+              });
+            }
+            
+            searchContext += `\nPlease provide a comprehensive answer based on these search results. Make sure to include relevant clickable links in your response.`;
+            
+            const result = await this.model.generateContent(searchContext);
+            return result.response.text();
+          }
+        } catch (searchError) {
+          console.error('Web search failed, falling back to regular chat:', searchError);
+        }
       }
 
       let prompt = `You are an educational AI assistant. Help the student with their question: ${message}`;
