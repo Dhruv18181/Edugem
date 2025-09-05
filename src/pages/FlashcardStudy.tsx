@@ -5,16 +5,17 @@ import { FlashcardSet, Flashcard, StudySession } from '../types';
 import { 
   ArrowLeft, 
   RotateCcw, 
-  CheckCircle, 
-  XCircle, 
-  Eye, 
-  EyeOff,
   Trophy,
   Clock,
   Target,
   Shuffle,
-  Settings,
-  BarChart3
+  BarChart3,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  EyeOff,
+  Star,
+  BookOpen
 } from 'lucide-react';
 
 const FlashcardStudy: React.FC = () => {
@@ -34,6 +35,7 @@ const FlashcardStudy: React.FC = () => {
   const [cardStartTime, setCardStartTime] = useState<Date>(new Date());
   const [isComplete, setIsComplete] = useState(false);
   const [studyMode, setStudyMode] = useState<'all' | 'difficult' | 'random'>('all');
+  const [isFlipped, setIsFlipped] = useState(false);
 
   useEffect(() => {
     if (setId) {
@@ -58,13 +60,13 @@ const FlashcardStudy: React.FC = () => {
         cards = cards.sort(() => Math.random() - 0.5);
         break;
       default:
-        // Keep original order for 'all'
         break;
     }
     
     setStudyCards(cards);
     setCurrentCardIndex(0);
     setShowAnswer(false);
+    setIsFlipped(false);
     setIsComplete(false);
     setSessionStats({
       startTime: new Date(),
@@ -75,26 +77,31 @@ const FlashcardStudy: React.FC = () => {
     setCardStartTime(new Date());
   };
 
-  const handleAnswer = (isCorrect: boolean) => {
+  const handleCardFlip = () => {
+    setIsFlipped(!isFlipped);
+    setShowAnswer(!showAnswer);
+  };
+
+  const handleNextCard = () => {
     if (!flashcardSet || !studyCards[currentCardIndex]) return;
 
     const responseTime = Date.now() - cardStartTime.getTime();
     const currentCard = studyCards[currentCardIndex];
     
-    // Update card statistics
+    // Update card statistics (assume correct for automatic progression)
     const updatedCard: Flashcard = {
       ...currentCard,
       lastReviewed: new Date(),
       reviewCount: currentCard.reviewCount + 1,
-      correctCount: currentCard.correctCount + (isCorrect ? 1 : 0),
-      confidence: calculateConfidence(currentCard, isCorrect)
+      correctCount: currentCard.correctCount + 1,
+      confidence: calculateConfidence(currentCard, true)
     };
 
     // Update session statistics
     setSessionStats(prev => ({
       ...prev,
       cardsStudied: prev.cardsStudied + 1,
-      correctAnswers: prev.correctAnswers + (isCorrect ? 1 : 0),
+      correctAnswers: prev.correctAnswers + 1,
       totalResponseTime: prev.totalResponseTime + responseTime
     }));
 
@@ -105,9 +112,19 @@ const FlashcardStudy: React.FC = () => {
     if (currentCardIndex < studyCards.length - 1) {
       setCurrentCardIndex(currentCardIndex + 1);
       setShowAnswer(false);
+      setIsFlipped(false);
       setCardStartTime(new Date());
     } else {
       completeSession();
+    }
+  };
+
+  const handlePreviousCard = () => {
+    if (currentCardIndex > 0) {
+      setCurrentCardIndex(currentCardIndex - 1);
+      setShowAnswer(false);
+      setIsFlipped(false);
+      setCardStartTime(new Date());
     }
   };
 
@@ -157,15 +174,25 @@ const FlashcardStudy: React.FC = () => {
     setStudyCards(shuffled);
     setCurrentCardIndex(0);
     setShowAnswer(false);
+    setIsFlipped(false);
     setCardStartTime(new Date());
+  };
+
+  // Clean text function to remove asterisks and format properly
+  const cleanText = (text: string) => {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold asterisks
+      .replace(/\*(.*?)\*/g, '$1') // Remove italic asterisks
+      .replace(/\*+/g, '') // Remove any remaining asterisks
+      .trim();
   };
 
   if (!flashcardSet || studyCards.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading flashcards...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent mx-auto mb-6"></div>
+          <p className="text-white text-xl">Loading flashcards...</p>
         </div>
       </div>
     );
@@ -173,56 +200,55 @@ const FlashcardStudy: React.FC = () => {
 
   const currentCard = studyCards[currentCardIndex];
   const progress = ((currentCardIndex + 1) / studyCards.length) * 100;
-  const accuracy = sessionStats.cardsStudied > 0 ? (sessionStats.correctAnswers / sessionStats.cardsStudied) * 100 : 0;
 
   if (isComplete) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <Trophy className="h-10 w-10 text-white" />
+      <div className="min-h-screen bg-gradient-to-br from-green-900 via-emerald-900 to-teal-900 flex items-center justify-center p-4">
+        <div className="max-w-2xl w-full text-center">
+          <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-12 border border-white/20 shadow-2xl">
+            <div className="w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg">
+              <Trophy className="h-12 w-12 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Session Complete!</h1>
-            <p className="text-gray-600 text-lg mb-8">Great job studying {flashcardSet.title}</p>
+            <h1 className="text-4xl font-bold text-white mb-4">Congratulations!</h1>
+            <p className="text-white/80 text-xl mb-12">You've completed studying {flashcardSet.title}</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <div className="text-3xl font-bold text-blue-600 mb-2">{sessionStats.cardsStudied}</div>
-                <div className="text-gray-600">Cards Studied</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+              <div className="bg-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                <div className="text-3xl font-bold text-white mb-2">{sessionStats.cardsStudied}</div>
+                <div className="text-white/70">Cards Studied</div>
               </div>
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <div className="text-3xl font-bold text-green-600 mb-2">{Math.round(accuracy)}%</div>
-                <div className="text-gray-600">Accuracy</div>
+              <div className="bg-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                <div className="text-3xl font-bold text-white mb-2">100%</div>
+                <div className="text-white/70">Completion</div>
               </div>
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <div className="text-3xl font-bold text-purple-600 mb-2">
+              <div className="bg-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                <div className="text-3xl font-bold text-white mb-2">
                   {Math.round(sessionStats.totalResponseTime / sessionStats.cardsStudied / 1000)}s
                 </div>
-                <div className="text-gray-600">Avg. Response Time</div>
+                <div className="text-white/70">Avg. Time</div>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={restartSession}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center space-x-2"
+                className="px-8 py-4 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-xl transition-all duration-200 backdrop-blur-sm border border-white/20 flex items-center justify-center space-x-2"
               >
-                <RotateCcw className="h-4 w-4" />
+                <RotateCcw className="h-5 w-5" />
                 <span>Study Again</span>
               </button>
               <button
                 onClick={() => navigate('/progress')}
-                className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center space-x-2"
+                className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg flex items-center justify-center space-x-2"
               >
-                <BarChart3 className="h-4 w-4" />
+                <BarChart3 className="h-5 w-5" />
                 <span>View Progress</span>
               </button>
               <button
                 onClick={() => navigate('/dashboard')}
-                className="px-6 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium rounded-lg transition-colors"
+                className="px-8 py-4 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-xl transition-all duration-200 backdrop-blur-sm border border-white/20"
               >
-                Back to Dashboard
+                Dashboard
               </button>
             </div>
           </div>
@@ -232,166 +258,225 @@ const FlashcardStudy: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="relative z-10 min-h-screen flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5" />
-              <span>Back to Dashboard</span>
-            </button>
-            <div className="h-6 w-px bg-gray-300" />
-            <h1 className="text-2xl font-bold text-gray-900">{flashcardSet.title}</h1>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={shuffleCards}
-              className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-              title="Shuffle Cards"
-            >
-              <Shuffle className="h-4 w-4" />
-            </button>
-            <button
-              onClick={restartSession}
-              className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-              title="Restart Session"
-            >
-              <RotateCcw className="h-4 w-4" />
-            </button>
+        <div className="p-6">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20"
+              >
+                <ArrowLeft className="h-5 w-5" />
+                <span>Dashboard</span>
+              </button>
+              <div className="h-6 w-px bg-white/30" />
+              <h1 className="text-2xl font-bold text-white">{cleanText(flashcardSet.title)}</h1>
+            </div>
+            
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={shuffleCards}
+                className="p-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-200 backdrop-blur-sm border border-white/20"
+                title="Shuffle Cards"
+              >
+                <Shuffle className="h-5 w-5" />
+              </button>
+              <button
+                onClick={restartSession}
+                className="p-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-200 backdrop-blur-sm border border-white/20"
+                title="Restart Session"
+              >
+                <RotateCcw className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-600">
-              Card {currentCardIndex + 1} of {studyCards.length}
-            </span>
-            <span className="text-sm text-gray-600">
-              {Math.round(accuracy)}% accuracy
-            </span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-blue-600 h-2 rounded-full transition-all duration-500"
-              style={{ width: `${progress}%` }}
-            />
+        <div className="px-6 mb-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-white/80 text-lg font-medium">
+                Card {currentCardIndex + 1} of {studyCards.length}
+              </span>
+              <span className="text-white/80 text-lg font-medium">
+                {Math.round(progress)}% Complete
+              </span>
+            </div>
+            <div className="w-full bg-white/20 rounded-full h-3 backdrop-blur-sm">
+              <div 
+                className="bg-gradient-to-r from-yellow-400 to-orange-500 h-3 rounded-full transition-all duration-500 shadow-lg"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Flashcard */}
-        <div className="mb-8">
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden min-h-[400px] flex flex-col">
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Target className="h-5 w-5 text-blue-600" />
-                  <span className="text-sm font-medium text-gray-700">{currentCard.topic}</span>
+        {/* Main Flashcard Area */}
+        <div className="flex-1 flex items-center justify-center px-6 pb-6">
+          <div className="max-w-4xl w-full">
+            {/* Flashcard */}
+            <div className="relative">
+              <div 
+                className={`relative w-full h-96 cursor-pointer transition-all duration-700 transform-gpu ${
+                  isFlipped ? 'rotate-y-180' : ''
+                }`}
+                onClick={handleCardFlip}
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                {/* Front of card */}
+                <div 
+                  className="absolute inset-0 w-full h-full backface-hidden"
+                  style={{ backfaceVisibility: 'hidden' }}
+                >
+                  <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-12 border border-white/20 shadow-2xl h-full flex flex-col justify-center items-center text-center">
+                    <div className="mb-6">
+                      <div className="inline-flex items-center px-4 py-2 bg-white/20 rounded-full text-white/80 text-sm font-medium backdrop-blur-sm">
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        Question
+                      </div>
+                    </div>
+                    <h2 className="text-3xl font-bold text-white mb-6 leading-relaxed">
+                      {cleanText(currentCard.front)}
+                    </h2>
+                    <div className="flex items-center space-x-2 text-white/60">
+                      <Eye className="h-5 w-5" />
+                      <span>Click to reveal answer</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    currentCard.difficulty === 'beginner' ? 'bg-green-100 text-green-700' :
-                    currentCard.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-red-100 text-red-700'
+
+                {/* Back of card */}
+                <div 
+                  className="absolute inset-0 w-full h-full backface-hidden rotate-y-180"
+                  style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+                >
+                  <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-lg rounded-3xl p-12 border border-emerald-300/30 shadow-2xl h-full flex flex-col justify-center items-center text-center">
+                    <div className="mb-6">
+                      <div className="inline-flex items-center px-4 py-2 bg-emerald-500/30 rounded-full text-white text-sm font-medium backdrop-blur-sm">
+                        <Star className="h-4 w-4 mr-2" />
+                        Answer
+                      </div>
+                    </div>
+                    <p className="text-2xl text-white mb-6 leading-relaxed">
+                      {cleanText(currentCard.back)}
+                    </p>
+                    <div className="flex items-center space-x-2 text-white/60">
+                      <EyeOff className="h-5 w-5" />
+                      <span>Click to flip back</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card metadata */}
+              <div className="flex items-center justify-between mt-6">
+                <div className="flex items-center space-x-4">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    currentCard.difficulty === 'beginner' ? 'bg-green-500/20 text-green-300 border border-green-500/30' :
+                    currentCard.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
+                    'bg-red-500/20 text-red-300 border border-red-500/30'
                   }`}>
                     {currentCard.difficulty}
                   </span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    currentCard.confidence === 'high' ? 'bg-green-100 text-green-700' :
-                    currentCard.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-red-100 text-red-700'
-                  }`}>
-                    {currentCard.confidence} confidence
+                  <span className="text-white/60 text-sm">
+                    Topic: {cleanText(currentCard.topic)}
                   </span>
                 </div>
+                <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  currentCard.confidence === 'high' ? 'bg-green-500/20 text-green-300 border border-green-500/30' :
+                  currentCard.confidence === 'medium' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
+                  'bg-red-500/20 text-red-300 border border-red-500/30'
+                }`}>
+                  {currentCard.confidence} confidence
+                </div>
               </div>
             </div>
-            
-            <div className="flex-1 p-8 flex flex-col justify-center">
+
+            {/* Navigation Controls */}
+            <div className="flex items-center justify-between mt-12">
+              <button
+                onClick={handlePreviousCard}
+                disabled={currentCardIndex === 0}
+                className="flex items-center space-x-2 px-6 py-3 bg-white/10 hover:bg-white/20 disabled:bg-white/5 disabled:text-white/30 text-white font-semibold rounded-xl transition-all duration-200 backdrop-blur-sm border border-white/20 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="h-5 w-5" />
+                <span>Previous</span>
+              </button>
+
               <div className="text-center">
-                <div className="text-xl font-semibold text-gray-900 mb-6 leading-relaxed">
-                  {currentCard.front}
+                <div className="text-white/60 text-sm mb-2">Progress</div>
+                <div className="text-2xl font-bold text-white">
+                  {currentCardIndex + 1} / {studyCards.length}
                 </div>
-                
-                {showAnswer && (
-                  <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
-                    <div className="text-lg text-gray-800 leading-relaxed">
-                      {currentCard.back}
-                    </div>
-                  </div>
-                )}
               </div>
-            </div>
-            
-            <div className="px-8 py-6 border-t border-gray-200 bg-gray-50">
-              {!showAnswer ? (
-                <button
-                  onClick={() => setShowAnswer(true)}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
-                >
-                  <Eye className="h-4 w-4" />
-                  <span>Show Answer</span>
-                </button>
-              ) : (
-                <div className="flex space-x-4">
-                  <button
-                    onClick={() => handleAnswer(false)}
-                    className="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
-                  >
-                    <XCircle className="h-4 w-4" />
-                    <span>Incorrect</span>
-                  </button>
-                  <button
-                    onClick={() => handleAnswer(true)}
-                    className="flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
-                  >
-                    <CheckCircle className="h-4 w-4" />
-                    <span>Correct</span>
-                  </button>
-                </div>
-              )}
+
+              <button
+                onClick={handleNextCard}
+                className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg"
+              >
+                <span>{currentCardIndex === studyCards.length - 1 ? 'Finish' : 'Next'}</span>
+                <ChevronRight className="h-5 w-5" />
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Session Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-            <div className="flex items-center space-x-3">
-              <Clock className="h-6 w-6 text-blue-600" />
-              <div>
-                <div className="text-2xl font-bold text-gray-900">{sessionStats.cardsStudied}</div>
-                <div className="text-sm text-gray-600">Cards Studied</div>
+        {/* Stats Footer */}
+        <div className="p-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                <div className="flex items-center space-x-3">
+                  <Clock className="h-6 w-6 text-blue-400" />
+                  <div>
+                    <div className="text-2xl font-bold text-white">{sessionStats.cardsStudied}</div>
+                    <div className="text-white/60 text-sm">Cards Studied</div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-            <div className="flex items-center space-x-3">
-              <Target className="h-6 w-6 text-green-600" />
-              <div>
-                <div className="text-2xl font-bold text-gray-900">{Math.round(accuracy)}%</div>
-                <div className="text-sm text-gray-600">Accuracy</div>
+              
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                <div className="flex items-center space-x-3">
+                  <Target className="h-6 w-6 text-green-400" />
+                  <div>
+                    <div className="text-2xl font-bold text-white">{Math.round(progress)}%</div>
+                    <div className="text-white/60 text-sm">Progress</div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-            <div className="flex items-center space-x-3">
-              <Trophy className="h-6 w-6 text-purple-600" />
-              <div>
-                <div className="text-2xl font-bold text-gray-900">{sessionStats.correctAnswers}</div>
-                <div className="text-sm text-gray-600">Correct Answers</div>
+              
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                <div className="flex items-center space-x-3">
+                  <Trophy className="h-6 w-6 text-yellow-400" />
+                  <div>
+                    <div className="text-2xl font-bold text-white">{studyCards.length - currentCardIndex - 1}</div>
+                    <div className="text-white/60 text-sm">Cards Remaining</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .rotate-y-180 {
+          transform: rotateY(180deg);
+        }
+        .backface-hidden {
+          backface-visibility: hidden;
+        }
+      `}</style>
     </div>
   );
 };

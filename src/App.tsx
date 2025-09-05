@@ -13,6 +13,8 @@ import Interview from './pages/Interview';
 import Learning from './pages/Learning';
 import Progress from './pages/Progress';
 import VoiceLearning from './pages/VoiceLearning';
+import FlashcardSetup from './pages/FlashcardSetup';
+import FlashcardStudy from './pages/FlashcardStudy';
 
 function App() {
   return (
