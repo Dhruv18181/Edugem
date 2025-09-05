@@ -43,7 +43,7 @@ const AboutPage: React.FC = () => {
       role: 'Backend Developer & AI Specialist',
       description: 'Expert developer specializing in scalable backend systems and AI integration. Brings technical excellence and innovative problem-solving to create robust educational platforms.',
       skills: ['Node.js', 'AI/ML', 'Database Design', 'API Development'],
-      image: null,
+      image: '/Armaan.jpg',
       social: {
         email: 'armaan@edugem.com',
         linkedin: '#',
@@ -55,7 +55,7 @@ const AboutPage: React.FC = () => {
       role: 'UI/UX Designer',
       description: 'Creative designer focused on user-centered design and creating intuitive, beautiful interfaces that enhance the learning experience and make education more accessible.',
       skills: ['UI/UX Design', 'User Research', 'Prototyping', 'Design Systems'],
-      image: null,
+      image: '/Sushil.jpg',
       social: {
         email: 'sushil@edugem.com',
         linkedin: '#',
@@ -430,7 +430,7 @@ const AboutPage: React.FC = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center">
             <div className="text-center p-6 bg-gray-50 rounded-2xl hover:shadow-lg transition-all duration-300">
               <Brain className="h-12 w-12 text-blue-600 mx-auto mb-4" />
               <h3 className="font-semibold text-gray-900 mb-2">AI & Machine Learning</h3>

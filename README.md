@@ -11,30 +11,27 @@
   [![Firebase](https://img.shields.io/badge/Firebase-12.0.0-orange.svg)](https://firebase.google.com/)
   [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.1-38B2AC.svg)](https://tailwindcss.com/)
   
-  [🚀 Live Demo](https://edugem.vercel.app) • [📖 Documentation](#documentation) • [🐛 Report Bug](https://github.com/Dhruv18181/Edugem/issues) • [✨ Request Feature](https://github.com/Dhruv18181/Edugem/issues)
+  [🚀 Live Demo](https://edugemm.vercel.app) • [📖 Documentation](#documentation) • [🐛 Report Bug](https://github.com/Dhruv18181/Edugem/issues) • [✨ Request Feature](https://github.com/Dhruv18181/Edugem/issues)
 </div>
 
 ---
 
 ## 📸 Project Showcase
 
-### 🏠 Landing Page
-<img src="./screenshots/landing-page.png" alt="Landing Page" width="100%">
-
 ### 🎯 Dashboard
-<img src="./screenshots/dashboard.png" alt="Dashboard" width="100%">
+<img src="./public/dashboard.png" alt="Dashboard" width="100%">
 
 ### 💬 AI Chat Interface
-<img src="./screenshots/chat-interface.png" alt="AI Chat Interface" width="100%">
+<img src="./public/chat-interface.png" alt="AI Chat Interface" width="100%">
 
 ### 🎤 Voice Interview System
-<img src="./screenshots/voice-interview.png" alt="Voice Interview" width="100%">
+<img src="./public/voice-interview.png" alt="Voice Interview" width="100%">
 
 ### 📚 Flashcard Learning
-<img src="./screenshots/flashcard-study.png" alt="Flashcard Study" width="100%">
+<img src="./public/flashcard-study.png" alt="Flashcard Study" width="100%">
 
 ### 📊 Progress Tracking
-<img src="./screenshots/progress-tracking.png" alt="Progress Tracking" width="100%">
+<img src="./public/progress-tracking.png" alt="Progress Tracking" width="100%">
 
 ---
 
@@ -224,8 +221,7 @@ The application will be available at `http://localhost:5173`
 ```
 Edugem/
 ├── public/                 # Static assets
-│   ├── logo.svg           # App logo
-│   ├── Harsh.jpg          # Team member photo
+│   ├── logo.svg           # App logo        
 │   └── Rishi.jpg          # Team member photo
 ├── src/
 │   ├── components/        # Reusable UI components
@@ -459,14 +455,14 @@ We welcome contributions from the community! Here's how you can help:
       <a href="https://linkedin.com/in/rishisingh" title="LinkedIn">💼</a>
     </td>
     <td align="center">
-      <img src="https://via.placeholder.com/100x100.png?text=AP" width="100px;" alt="Armaan Patel"/><br />
+      <img src="./public/Armaan.jpg" width="100px;" alt="Armaan Patel"/><br />
       <sub><b>Armaan Patel</b></sub><br />
       <sub>UI/UX Designer</sub><br />
       <a href="https://github.com/armaanpatel" title="GitHub">🔗</a>
       <a href="https://linkedin.com/in/armaanpatel" title="LinkedIn">💼</a>
     </td>
     <td align="center">
-      <img src="https://via.placeholder.com/100x100.png?text=SS" width="100px;" alt="Sushil Sharma"/><br />
+      <img src="./public/Sushil.jpg" width="100px;" alt="Sushil Sharma"/><br />
       <sub><b>Sushil Sharma</b></sub><br />
       <sub>Researcher & Analyst</sub><br />
       <a href="https://github.com/sushilsharma" title="GitHub">🔗</a>
