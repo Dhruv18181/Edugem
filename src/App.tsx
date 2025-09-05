@@ -12,6 +12,7 @@ import Chat from './pages/Chat';
 import Interview from './pages/Interview';
 import Learning from './pages/Learning';
 import Progress from './pages/Progress';
+import VoiceLearning from './pages/VoiceLearning';
 
 function App() {
   return (
@@ -63,10 +64,32 @@ function App() {
               </Sidebar>
             </ProtectedRoute>
           } />
+          <Route path="/flashcards/setup/:subjectId" element={
+            <ProtectedRoute>
+              <FlashcardSetup />
+            </ProtectedRoute>
+          } />
+          <Route path="/flashcards/custom" element={
+            <ProtectedRoute>
+              <FlashcardSetup />
+            </ProtectedRoute>
+          } />
+          <Route path="/study/:setId" element={
+            <ProtectedRoute>
+              <FlashcardStudy />
+            </ProtectedRoute>
+          } />
           <Route path="/progress" element={
             <ProtectedRoute>
               <Sidebar>
                 <Progress />
+              </Sidebar>
+            </ProtectedRoute>
+          } />
+          <Route path="/voice-learning" element={
+            <ProtectedRoute>
+              <Sidebar>
+                <VoiceLearning />
               </Sidebar>
             </ProtectedRoute>
           } />

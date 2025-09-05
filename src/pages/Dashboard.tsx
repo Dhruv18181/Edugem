@@ -3,7 +3,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { Subject, UserProgress } from '../types';
 import { storageService } from '../utils/storage';
 import SubjectCard from '../components/SubjectCard';
-import { BookOpen, TrendingUp, Award, Clock, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+import { BookOpen, TrendingUp, Award, Clock, ChevronDown, ChevronUp, Sparkles, GraduationCap, Upload, Eye } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { flashcardStorage } from '../utils/flashcardStorage';
 
 interface SubjectSection {
   id: string;
@@ -284,6 +286,11 @@ const Dashboard: React.FC = () => {
     programming: false,
     academic: false
   });
+  const [flashcardStats, setFlashcardStats] = useState({
+    totalSets: 0,
+    totalCards: 0,
+    recentSets: [] as any[]
+  });
   const [stats, setStats] = useState({
     totalSubjects: subjectSections.reduce((total, section) => total + section.subjects.length, 0),
     completedLessons: 0,
@@ -294,6 +301,15 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const progress = storageService.getUserProgress();
     setUserProgress(progress);
+    
+    // Load flashcard statistics
+    const flashcardSets = flashcardStorage.getFlashcardSets();
+    const overallStats = flashcardStorage.getOverallStats();
+    setFlashcardStats({
+      totalSets: overallStats.totalSets,
+      totalCards: overallStats.totalCards,
+      recentSets: flashcardSets.slice(-3).reverse()
+    });
     
     // Calculate stats
     const completedLessons = Object.values(progress).reduce(
@@ -396,6 +412,143 @@ const Dashboard: React.FC = () => {
                 <p className="text-2xl font-bold text-gray-900">{stats.streak}</p>
               </div>
               <Clock className="h-8 w-8 text-purple-500" />
+            </div>
+          </div>
+        </div>
+
+        {/* Flashcard Section */}
+        <div className="mb-8">
+          <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <BookOpen className="h-6 w-6 text-purple-600" />
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">Flashcard Learning</h2>
+                    <p className="text-gray-600 text-sm">Create and study with AI-generated flashcards</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-purple-600">{flashcardStats.totalSets}</div>
+                    <div className="text-xs text-gray-500">Sets Created</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* Create from Subject */}
+                <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+                      <BookOpen className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Subject-Based Learning</h3>
+                      <p className="text-gray-600 text-sm">Choose a subject and specify topics</p>
+                    </div>
+                  </div>
+                  <p className="text-gray-700 mb-4">
+                    Select any subject from our curriculum and specify the exact topics you want to learn. 
+                    Our AI will generate comprehensive flashcards tailored to your needs.
+                  </p>
+                  <div className="text-sm text-gray-600 mb-4">
+                    ✓ 20+ subjects available<br/>
+                    ✓ Customizable difficulty levels<br/>
+                    ✓ Topic-specific content
+                  </div>
+                  <Link
+                    to="/flashcards/create"
+                    className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    <span>Create Flashcards</span>
+                  </Link>
+                </div>
+
+                {/* Custom Upload */}
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center">
+                      <Upload className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Custom Materials</h3>
+                      <p className="text-gray-600 text-sm">Upload your own study materials</p>
+                    </div>
+                  </div>
+                  <p className="text-gray-700 mb-4">
+                    Upload images, PDFs, or text files of your syllabus, notes, or textbooks. 
+                    Our AI will extract key topics and create personalized flashcards.
+                  </p>
+                  <div className="text-sm text-gray-600 mb-4">
+                    ✓ Support for JPG, PNG, PDF, TXT<br/>
+                    ✓ OCR text extraction<br/>
+                    ✓ Automatic topic detection
+                  </div>
+                  <Link
+                    to="/flashcards/custom"
+                    className="inline-flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                  >
+                    <Upload className="h-4 w-4" />
+                    <span>Upload Materials</span>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Recent Flashcard Sets */}
+              {flashcardStats.recentSets.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Flashcard Sets</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {flashcardStats.recentSets.map((set) => (
+                      <Link
+                        key={set.id}
+                        to={`/study/${set.id}`}
+                        className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all duration-200 group"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors truncate">
+                            {set.title}
+                          </h4>
+                          <Eye className="h-4 w-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                        </div>
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{set.description}</p>
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <span>{set.totalCards} cards</span>
+                          <span className="capitalize">{set.difficulty}</span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Quick Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">{flashcardStats.totalSets}</div>
+                  <div className="text-sm text-gray-600">Total Sets</div>
+                </div>
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">{flashcardStats.totalCards}</div>
+                  <div className="text-sm text-gray-600">Total Cards</div>
+                </div>
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600">
+                    {flashcardStats.recentSets.filter(set => set.lastStudied).length}
+                  </div>
+                  <div className="text-sm text-gray-600">Studied Sets</div>
+                </div>
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-bold text-orange-600">
+                    {flashcardStats.recentSets.reduce((sum, set) => sum + set.masteredCards, 0)}
+                  </div>
+                  <div className="text-sm text-gray-600">Mastered Cards</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

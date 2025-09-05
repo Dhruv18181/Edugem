@@ -15,6 +15,7 @@ import {
   Trash2,
   MessageSquare,
   Mic,
+  GraduationCap,
   LogOut,
   User
 } from 'lucide-react';
@@ -65,6 +66,12 @@ const Sidebar: React.FC<SidebarProps> = ({ children }) => {
       label: 'Voice Interview', 
       icon: Mic,
       description: 'Practice with AI interviewer'
+    },
+    { 
+      path: '/voice-learning', 
+      label: 'Voice Learning', 
+      icon: GraduationCap,
+      description: 'AI tutor for any subject'
     },
     { 
       path: '/progress', 
