@@ -41,7 +41,7 @@ interface InterviewerAgent {
   description: string;
   accent: string;
   expertise: string[];
-  avatar: string;
+  avatarUrl: string;
   color: string;
   rating: number;
   interviews: number;
@@ -70,41 +70,80 @@ const Interview: React.FC = () => {
 
   const interviewers: InterviewerAgent[] = [
     {
-      id: 'f1ac752f-cc05-421d-8fab-567a675f1fa6',
+      id: 'b50895a7-598d-49f8-8aff-0d3133df4a1f',
       name: 'Elliot',
-      title: 'Senior Technical Interviewer',
+      title: 'Senior Full-Stack Developer Interviewer',
       description: 'Experienced Canadian interviewer specializing in technical roles and software engineering positions.',
       accent: 'Canadian English',
       expertise: ['Technical Interviews', 'Software Engineering', 'System Design', 'Problem Solving'],
-      avatar: '🇨🇦',
+      avatarUrl: 'https://images.pexels.com/photos/3777943/pexels-photo-3777943.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
       color: 'from-blue-500 to-cyan-500',
       rating: 4.9,
       interviews: 1250
     },
     {
-      id: '91c87146-0136-47c9-bad7-ac5c3a88a0b1',
+  id: 'ce3261d3-a408-4139-b3da-c29d646e22ce',
+  name: 'Harry',
+  title: 'Mobile App Developer',
+  description: 'Professional and energetic interviewer with a clear communication style, specializing in mobile app development for Android, iOS, and cross-platform frameworks.',
+  accent: 'American English',
+  expertise: ['Android Development (Kotlin, Java)', 'iOS Development (Swift)', 'Cross-Platform (Flutter, React Native)', 'App Architecture & Design Patterns', 'API Integration & Mobile UI/UX'],
+  avatarUrl: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
+  color: 'from-blue-500 to-cyan-500',
+  rating: 4.7,
+  interviews: 870
+},
+
+    {
+      id: 'c1a0b713-f594-492e-bbba-3550320124bc',
       name: 'Neha',
-      title: 'HR & Behavioral Specialist',
+      title: 'Data Scientist Interviewer',
       description: 'Professional Indian interviewer with expertise in behavioral interviews and cultural fit assessment.',
       accent: 'Indian English',
       expertise: ['Behavioral Interviews', 'HR Screening', 'Cultural Fit', 'Leadership Assessment'],
-      avatar: '🇮🇳',
+      avatarUrl: 'https://images.pexels.com/photos/3760263/pexels-photo-3760263.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
       color: 'from-purple-500 to-pink-500',
       rating: 4.8,
       interviews: 980
     },
     {
-      id: 'b423edf2-2d98-471b-8805-24711e6a7543',
-      name: 'Rohan',
-      title: 'Product & Strategy Expert',
-      description: 'Indian-American interviewer focused on product management, strategy, and business development roles.',
-      accent: 'Indian-American English',
-      expertise: ['Product Management', 'Strategy', 'Business Development', 'Market Analysis'],
-      avatar: '🌎',
-      color: 'from-green-500 to-teal-500',
-      rating: 4.9,
-      interviews: 1100
-    }
+  id: 'bf2d7c64-ac50-4d49-a547-7c2844e38ddb',
+  name: 'Cole',
+  title: 'Product & Strategy Expert',
+  description: 'American interviewer with a deep voice, specializing in product management, strategy, and business development roles.',
+  accent: 'Deep American English',
+  expertise: ['Product Management', 'Strategy', 'Business Development', 'Market Analysis'],
+  avatarUrl: 'https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
+  color: 'from-green-500 to-teal-500',
+  rating: 4.9,
+  interviews: 1100
+},
+    {
+  id: '9eb19b81-5c86-4d12-95dd-93e3f9962910',
+  name: 'Rohan',
+  title: 'DevOps Engineer',
+  description: 'Indian-American interviewer focused on DevOps, cloud infrastructure, and automation roles.',
+  accent: 'Indian-American English',
+  expertise: ['CI/CD Pipelines', 'Cloud Infrastructure (AWS, Azure, GCP)', 'Containerization (Docker, Kubernetes)', 'Infrastructure as Code (Terraform, Ansible)', 'Monitoring & Logging'],
+  avatarUrl: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
+  color: 'from-green-500 to-teal-500',
+  rating: 4.9,
+  interviews: 1100
+},
+    {
+  id: 'c422028e-965b-4c6a-9399-22a3f953b6f2',
+  name: 'Hana',
+  title: 'Machine Learning Engineer',
+  description: 'Asian interviewer with a gentle tone, specializing in machine learning, deep learning, and AI engineering roles.',
+  accent: 'Asian English',
+  expertise: ['Machine Learning', 'Deep Learning', 'Natural Language Processing', 'Model Deployment', 'MLOps'],
+  avatarUrl: 'https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
+  color: 'from-purple-500 to-indigo-500',
+  rating: 4.8,
+  interviews: 940
+}
+
+
   ];
 
   useEffect(() => {
@@ -339,7 +378,11 @@ const Interview: React.FC = () => {
                 <div
                   className={`w-20 h-20 bg-gradient-to-br ${interviewer.color} rounded-2xl flex items-center justify-center text-3xl mb-6 mx-auto shadow-xl group-hover:scale-110 transition-transform duration-300`}
                 >
-                  {interviewer.avatar}
+                  <img 
+                    src={interviewer.avatarUrl} 
+                    alt={interviewer.name}
+                    className="w-full h-full rounded-2xl object-cover"
+                  />
                 </div>
 
                 {/* Info */}
@@ -408,7 +451,11 @@ const Interview: React.FC = () => {
                     <div
                       className={`w-12 h-12 bg-gradient-to-br ${selectedAgent.color} rounded-xl flex items-center justify-center text-xl shadow-lg`}
                     >
-                      {selectedAgent.avatar}
+                      <img 
+                        src={selectedAgent.avatarUrl} 
+                        alt={selectedAgent.name}
+                        className="w-full h-full rounded-xl object-cover"
+                      />
                     </div>
                     <div className="text-left">
                       <div className="text-white font-semibold">{selectedAgent.name}</div>
@@ -525,7 +572,11 @@ const Interview: React.FC = () => {
                   <div className={`w-32 h-32 bg-gradient-to-br ${selectedAgent.color} rounded-full flex items-center justify-center shadow-2xl text-4xl ${
                     isSpeaking.assistant ? 'animate-pulse ring-4 ring-green-400' : ''
                   }`}>
-                    {selectedAgent.avatar}
+                    <img 
+                      src={selectedAgent.avatarUrl} 
+                      alt={selectedAgent.name}
+                      className="w-full h-full rounded-full object-cover"
+                    />
                   </div>
                 )}
               </div>
