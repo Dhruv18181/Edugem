@@ -31,7 +31,7 @@ const AboutPage: React.FC = () => {
       role: 'Team Leader & Full-Stack Developer',
       description: 'Visionary leader with 8+ years of experience in educational technology. Passionate about creating innovative AI-powered solutions that make learning accessible and engaging for everyone.',
       skills: ['Leadership', 'Full-Stack Development', 'AI Integration', 'Product Strategy'],
-      image: '/Rishi.jpg',
+      image: '/',
       social: {
         email: 'rishi@edugem.com',
         linkedin: '#',
@@ -43,7 +43,7 @@ const AboutPage: React.FC = () => {
       role: 'Backend Developer & AI Specialist',
       description: 'Expert developer specializing in scalable backend systems and AI integration. Brings technical excellence and innovative problem-solving to create robust educational platforms.',
       skills: ['Node.js', 'AI/ML', 'Database Design', 'API Development'],
-      image: '/Armaan.jpg',
+      image: '/',
       social: {
         email: 'armaan@edugem.com',
         linkedin: '#',
@@ -55,7 +55,7 @@ const AboutPage: React.FC = () => {
       role: 'UI/UX Designer',
       description: 'Creative designer focused on user-centered design and creating intuitive, beautiful interfaces that enhance the learning experience and make education more accessible.',
       skills: ['UI/UX Design', 'User Research', 'Prototyping', 'Design Systems'],
-      image: '/Sushil.jpg',
+      image: '/g',
       social: {
         email: 'sushil@edugem.com',
         linkedin: '#',
